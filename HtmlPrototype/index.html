@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>[Project ImageMath]</title>
+    <link rel="stylesheet" href="Styles/Site.css" />
+    <script src="Scripts/Logic.js"></script>
+  </head>
+  <body>
+    <header>
+      a proof of concept by <a href="http://neopostmodern.com/">NEO POST MODERN</a><br/>
+      2014<br/>
+      pure CoffeeScript using 2D-canvas<br/>
+      <br/>
+      all images (c) clemens schöll<br/>
+    </header>
+    <h1>[Project ImageMath]</h1>
+    <div class="options">
+      <div style="width: 33%">
+        First source image:
+        <select id="source-1-selector">
+          <option value="papier">sketch of an installation</option>
+          <option value="fragezeichen">glowing question mark</option>
+          <option value="knicklichter" selected>glowing sticks</option>
+          <option value="quito">traffic light</option>
+          <option value="kran">industrial structure</option>
+        </select><br/>
+        Background color of first target:
+        <select id="canvas-1-color-selector">
+          <option value="white" selected>white</option>
+          <option value="black">black</option>
+        </select>
+      </div>
+      <div style="width: 33%">
+        Second source image:
+        <select id="source-2-selector">
+          <option value="papier">sketch of an installation</option>
+          <option value="fragezeichen">glowing question mark</option>
+          <option value="knicklichter">glowing sticks</option>
+          <option value="quito">traffic light</option>
+          <option value="kran" selected>industrial structure</option>
+        </select><br/>
+        Background color of second target:
+        <select id="canvas-2-color-selector">
+          <option value="white" selected>white</option>
+          <option value="black">black</option>
+        </select>
+      </div>
+      <div>
+        Background color of addition:
+        <select id="canvas-addition-color-selector">
+          <option value="white" selected>white</option>
+          <option value="black">black</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="multiplier">
+      <img class="source" src="Images/papier.JPG" id="source-1" />
+      ×
+      <div class="grid" id="grid-1">
+        <!-- <div class="grid-square" id="0" data-x-position="0" data-y-position="0"></div>-->
+      </div>
+      =
+      <canvas id="canvas-1" width="400" height="400"></canvas>
+    </div>
+    <div class="math-sign">
+      +
+    </div>
+    <div class="multiplier">
+      <div class="grid" id="grid-2">
+        <!-- <div class="grid-square" id="0" data-x-position="0" data-y-position="0"></div>-->
+      </div>
+      ×
+      <img class="source" src="Images/papier.JPG" id="source-2" />
+      =
+      <canvas id="canvas-2" width="400" height="400"></canvas>
+    </div>
+    <div class="math-sign">
+      =
+    </div>
+    <div class="addition">
+      <canvas id="canvas-addition" width="400" height="400"></canvas>
+    </div>
+    <footer>
+      <b>contact</b><br/>
+      clemens schöll<br/>
+      wissmannstraße 15<br/>
+      12049 berlin<br/>
+      <a href="mailto:clemens@neopostmodern.com">clemens@neopostmodern.com</a>
+    </footer>
+  </body>
+</html>
