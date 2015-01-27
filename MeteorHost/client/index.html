@@ -1,7 +1,28 @@
 <body>
   <h1>Project ImageMath: Meteor Signal Distribution Service</h1>
 
-  {{#each positions}}
-    [Room {{room}}] {{x}} / {{y}} : {{#if active}}active{{/if}}<br/>
-  {{/each}}
+  <div class="main">
+    <div class="container">
+      <table>
+        {{#each grid 1}}
+          <tr>
+            {{#each cells}}
+              <td>
+                {{#if active}}<b>1</b>{{else}}<i>0</i>{{/if}}
+              </td>
+            {{/each}}
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+    <div class="container">
+      {{#each positions}}
+        [Room {{room}}] {{x}} / {{y}} : {{#if active}}active{{/if}}<br/>
+      {{/each}}
+    </div>
+    <div class="container">
+      {{{log}}}
+    </div>
+  </div>
+
 </body>

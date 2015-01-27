@@ -1,17 +1,26 @@
 Meteor.methods(
-  'activate-position': (x, y, room) ->
-    console.log "activate position @#{ x }/#{ y }"
+  'activate-position': (room, x, y) ->
+    console.log "activate position [#{ room }] @#{ x }/#{ y }"
+
 
     Positions.update(
-      x: x
-      y: y
-      room: room
+      "#{ room }:#{ x }/#{ y }"
     ,
       $set: active: true
     )
 
-  'deactivate-position': (x, y, room) ->
-    console.log "deactivate position @#{ x }/#{ y }"
+    return 'OK'
+
+#    Positions.update(
+#      x: x
+#      y: y
+#      room: room
+#    ,
+#      $set: active: true
+#    )
+
+  'deactivate-position': (room, x, y) ->
+    console.log "deactivate position [#{ room }] @#{ x }/#{ y }"
     Positions.update(
       x: x
       y: y
@@ -20,5 +29,5 @@ Meteor.methods(
       $set: active: false
     )
 
-    return 'success'
+    return 'OK'
 )
