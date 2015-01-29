@@ -1,4 +1,4 @@
-from lib import Meteor
+from meteor import Meteor
 import time
 
 client = Meteor.DDPClient('ws://127.0.0.1:3000/websocket')
