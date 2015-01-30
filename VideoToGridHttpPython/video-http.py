@@ -3,10 +3,7 @@ import cv2
 import time
 import httplib2
 import argparse
-
-SIZE = 10
-# VIDEO_ID = 0
-ROOM = 0
+import sys
 
 def server_call(method, parameters):
     def callback(error, response):
@@ -96,6 +93,10 @@ def main():
             break
 
     print("\nShutting down...")
+    for x in range(SIZE):
+        for y in range(SIZE):
+            deactivate_position(ROOM, x, y)
+
     cap.release()
     cv2.destroyAllWindows()
     print("Done and good bye!")
@@ -103,7 +104,14 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--VIDEO_ID', nargs=1, action='store_constant', const=0)
+    parser.add_argument('-v', '--video', action='store', type=int, default=0)
+    parser.add_argument('-r', '--room', action='store', type=int, default=0)
+    parser.add_argument('-s', '--size', action='store', type=int, default=10)
+    arguments = parser.parse_args(sys.argv[1:])
+
+    VIDEO_ID = arguments.video
+    ROOM = arguments.room
+    SIZE = arguments.size
 
     print("Initializing video...")
     print("Using camera #%d" % VIDEO_ID)
