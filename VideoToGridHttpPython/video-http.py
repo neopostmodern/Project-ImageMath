@@ -26,7 +26,7 @@ def activate_position(room, x, y):
     server_call('activate', [room, x, y])
 
 def deactivate_position(room, x, y):
-    print("Activating [%d] %d/%d..." % (room, x, y)) #, end='')
+    print("Deactivating [%d] %d/%d..." % (room, x, y)) #, end='')
     server_call('deactivate', [room, x, y])
 
 def main():
@@ -47,7 +47,18 @@ def main():
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         moving_objects_image = movement_filter.apply(frame)
 
-        scaled_grid = cv2.resize(moving_objects_image, (SIZE, SIZE), cv2.INTER_AREA)
+        objects_in_field = moving_objects_image[:, rectangle_offset:rectangle_offset+target_size]
+
+        contour_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+        two_channel_objects_in_field = cv2.threshold(objects_in_field, 200, 255, cv2.THRESH_BINARY)
+        two_channel_objects_in_field = two_channel_objects_in_field[1]
+        _, contours, hierarchy = cv2.findContours(two_channel_objects_in_field, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, offset=(rectangle_offset, 0))
+        significant_contours = [contour for contour in contours if cv2.contourArea(contour) > 100]
+        human_contours = [cv2.approxPolyDP(contour, 3, True) for contour in significant_contours]
+
+        cv2.fillPoly(contour_image, human_contours, (255, 0, 0))
+
+        scaled_grid = cv2.resize(objects_in_field, (SIZE, SIZE), cv2.INTER_AREA)
         new_positions = scaled_grid > 200
 
         overlay = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
@@ -84,6 +95,7 @@ def main():
             5  # line width
         )
         #  = cv2.add(moving_objects_image, overlay)
+        moving_objects_image = cv2.addWeighted(moving_objects_image, 0.5, contour_image, 0.8, 0.1)
         moving_objects_image = cv2.addWeighted(moving_objects_image, 0.8, overlay, 0.8, 1.0)
 
         cv2.imshow('frame', moving_objects_image)
@@ -93,9 +105,11 @@ def main():
             break
 
     print("\nShutting down...")
+    print("Deactivating all cells...")
     for x in range(SIZE):
         for y in range(SIZE):
             deactivate_position(ROOM, x, y)
+    print("OK.")
 
     cap.release()
     cv2.destroyAllWindows()
