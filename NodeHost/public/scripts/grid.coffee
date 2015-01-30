@@ -2,7 +2,7 @@ define ["jquery", "socket_io"], ($, io) ->
   messages = "updates from server<br/><br/>"
   Messaging = (message) ->
     messages += message + "<br/>"
-    document.getElementById("messages").innerHTML = messages
+    # document.getElementById("messages").innerHTML = messages
 
 
 

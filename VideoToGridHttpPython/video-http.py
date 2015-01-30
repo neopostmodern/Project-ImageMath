@@ -1,3 +1,4 @@
+import functools
 import numpy as np
 import cv2
 import time
@@ -50,18 +51,37 @@ def main():
         objects_in_field = moving_objects_image[:, rectangle_offset:rectangle_offset+target_size]
 
         contour_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+        center_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+        overlay = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+
         two_channel_objects_in_field = cv2.threshold(objects_in_field, 200, 255, cv2.THRESH_BINARY)
         two_channel_objects_in_field = two_channel_objects_in_field[1]
-        _, contours, hierarchy = cv2.findContours(two_channel_objects_in_field, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, offset=(rectangle_offset, 0))
-        significant_contours = [contour for contour in contours if cv2.contourArea(contour) > 100]
-        human_contours = [cv2.approxPolyDP(contour, 3, True) for contour in significant_contours]
+        _, raw_contours, hierarchy = cv2.findContours(two_channel_objects_in_field, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # , offset=(rectangle_offset, 0)
 
-        cv2.fillPoly(contour_image, human_contours, (255, 0, 0))
+        significant_contours = [contour for contour in raw_contours if cv2.contourArea(contour) > 100]
+        contours = [cv2.approxPolyDP(contour, 3, True) for contour in significant_contours]
 
-        scaled_grid = cv2.resize(objects_in_field, (SIZE, SIZE), cv2.INTER_AREA)
-        new_positions = scaled_grid > 200
+        centers = []
+        for contour in contours:
+            center = np.zeros(2)
+            for point in contour:
+                center += point[0]  # weird extra nesting
+            center /= len(contour)
+            centers.append(center)
 
-        overlay = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+        # re-ordering x vs. y here:
+        new_position_indices = ([(int(center[1] / square_size), int(center[0] / square_size)) for center in centers])
+        new_positions = np.zeros((SIZE, SIZE), dtype='int')
+        for new_position_index in new_position_indices:
+            new_positions[new_position_index] = True
+
+        for center in centers:
+            center_for_display = (int(center[0]) + rectangle_offset, int(center[1]))
+            cv2.circle(center_image, center_for_display, 10, (0, 255, 255), thickness=-1)
+
+        contours_for_display = [contour + [[rectangle_offset, 0]] for contour in contours]
+        cv2.fillPoly(contour_image, contours_for_display, (255, 0, 0))
 
         for x in range(SIZE):
             for y in range(SIZE):
@@ -95,10 +115,13 @@ def main():
             5  # line width
         )
         #  = cv2.add(moving_objects_image, overlay)
-        moving_objects_image = cv2.addWeighted(moving_objects_image, 0.5, contour_image, 0.8, 0.1)
-        moving_objects_image = cv2.addWeighted(moving_objects_image, 0.8, overlay, 0.8, 1.0)
+        moving_objects_image = cv2.addWeighted(moving_objects_image, 0.6, contour_image, 0.5, 0.1)
+        overlay = cv2.addWeighted(contour_image, 0.8, overlay, 0.8, 1.0)
+        overlay = cv2.addWeighted(center_image, 0.8, overlay, 0.8, 1.0)
 
-        cv2.imshow('frame', moving_objects_image)
+        cv2.imshow('Input (converted to grayscale)', frame)
+        cv2.imshow('Processed', moving_objects_image)
+        cv2.imshow('Analysis', overlay)
 
         k = cv2.waitKey(30) & 0xff
         if k == 27:

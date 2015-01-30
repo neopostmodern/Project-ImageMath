@@ -8,8 +8,18 @@ require.config(
 
 require ["jquery", "image_drawing", "media_provider"], ($, Drawing, MediaProvider) ->
   $().ready ->
-    drawingHorizontal = new Drawing($('#drawing'), roomNumber: 0, orientation: Drawing.ORIENTATION.HORIZONTAL, ImageSource: 'images/knicklichter.JPG')
-    drawingVertical = new Drawing($('#drawing'), roomNumber: 0, orientation: Drawing.ORIENTATION.VERTICAL, ImageSource: 'images/kran.JPG')
+    drawingHorizontal = new Drawing(
+      $('#drawing'),
+      roomNumber: 0,
+      orientation: Drawing.ORIENTATION.HORIZONTAL,
+      ImageSource: 'images/fragezeichen.JPG'
+    )
+    drawingVertical = new Drawing(
+      $('#drawing'),
+      roomNumber: 0,
+      orientation: Drawing.ORIENTATION.VERTICAL,
+      ImageSource: 'images/quito.JPG'
+    )
 
     drawingHorizontal.StartAutomatedRendering(25)
     drawingVertical.StartAutomatedRendering(25)
