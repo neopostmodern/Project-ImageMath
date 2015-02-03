@@ -1,3 +1,4 @@
+import colorsys
 import functools
 import numpy as np
 import cv2
@@ -16,7 +17,12 @@ def server_call(method, parameters):
 
     parameters.insert(0, method)
     url = "http://localhost:4000/%s/%d/%d/%d" % tuple(parameters)
+    if not ONLINE:
+        url = "SIMULATING > " + url
     print(url)
+    if not ONLINE:
+        return
+
     (result, response) = http.request(url, method="POST")
     if result.status != 200:
         print("Failed.")
@@ -51,6 +57,7 @@ def main():
         objects_in_field = moving_objects_image[:, rectangle_offset:rectangle_offset+target_size]
 
         contour_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
+        rainbow_contour_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
         center_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
         overlay = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
 
@@ -82,6 +89,18 @@ def main():
 
         contours_for_display = [contour + [[rectangle_offset, 0]] for contour in contours]
         cv2.fillPoly(contour_image, contours_for_display, (255, 0, 0))
+        for index, contour in enumerate(contours_for_display):
+            print(contours_for_display)
+            print(contour)
+            cv2.fillPoly(
+                rainbow_contour_image,
+                [np.array(contour)],
+                tuple(np.array(colorsys.hsv_to_rgb(
+                    index / len(contours_for_display),
+                    1,
+                    1)
+                ) * 255)
+            )
 
         for x in range(SIZE):
             for y in range(SIZE):
@@ -122,6 +141,7 @@ def main():
         cv2.imshow('Input (converted to grayscale)', frame)
         cv2.imshow('Processed', moving_objects_image)
         cv2.imshow('Analysis', overlay)
+        cv2.imshow('Analysis (areas only)', rainbow_contour_image)
 
         k = cv2.waitKey(30) & 0xff
         if k == 27:
@@ -144,11 +164,13 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--video', action='store', type=int, default=0)
     parser.add_argument('-r', '--room', action='store', type=int, default=0)
     parser.add_argument('-s', '--size', action='store', type=int, default=10)
+    parser.add_argument('-x', '--offline', action='store', type=int, default=10)  # todo: implement as boolean flag
     arguments = parser.parse_args(sys.argv[1:])
 
     VIDEO_ID = arguments.video
     ROOM = arguments.room
     SIZE = arguments.size
+    ONLINE = True # get from argument
 
     print("Initializing video...")
     print("Using camera #%d" % VIDEO_ID)
