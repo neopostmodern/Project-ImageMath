@@ -1,25 +1,81 @@
 //import 'babel/polyfill';
-import React from 'react';
-import classNames from 'classnames'
+import React from 'react/addons';
+import classNames from 'classnames';
+import _ from 'lodash';
+
+import Floor from './components/floor.js';
 
 class App extends React.Component {
-  render() {
-    let grid = [];
-    for (let i = 0; i < 10; i++) {
-      let cells = [];
+  get DEACTIVATE () { return 'deactivate'; };
+  get ACTIVATE () { return 'activate'; };
+  get MOUSE_ENTER () { return 'mouse-enter'; };
+  get MOUSE_LEAVE () { return 'mouse-leave'; };
 
-      for (let j = 0; j < 10; j++) {
-        let human;
-        if (i == 2 && j == 5) {
-          human = <img src="images/people/man.svg" />;
-        }
-        cells.push(<div className="cell" key={i + '-' + j}></div>);
+  constructor() {
+    super();
+
+    let grid = new Array(10);
+    for (var i = 0; i < 10; i++) {
+      grid[i] = new Array(10);
+      for (var j = 0; j < 10; j++) {
+        grid[i][j] = 0;
       }
-
-      grid.push(<div className="row" key={i}>{cells}</div>);
     }
 
-    console.log(grid);
+    //grid[0][3] = 1;
+
+    this.state = {
+      grid: grid
+    };
+  }
+
+  componentDidMount() {
+    // todo: fetch grid from server etc.
+  }
+
+  changeCellStatus(x, y, action) {
+    let grid = this.state.grid;
+    let newValue;
+
+    if (action == this.DEACTIVATE) {
+      newValue = 0;
+    } else if (action == this.ACTIVATE) {
+      newValue = 1;
+    } else if (action == this.MOUSE_ENTER) {
+      if (grid[x][y] == 0) {
+        newValue = 0.5;
+      }
+    } else if (action == this.MOUSE_LEAVE) {
+      if (grid[x][y] < 1) {
+        newValue = 0;
+      }
+    } else {
+      console.error("[App] Unknown action in 'changeCellStatus': " + action)
+    }
+
+
+    if (newValue != null) {
+      let change = {};
+      change[x] = {};
+      change[x][y] = { $set: newValue };
+      let updatedGrid = React.addons.update(grid, change);
+      this.setState({grid: updatedGrid});
+
+      //console.log("Changed " + x + "/" + y + " to " + newValue);
+    }
+  }
+
+  _mouseEnterCell(x, y) {
+    this.changeCellStatus(x, y, this.MOUSE_ENTER);
+  }
+  _mouseLeaveCell(x, y) {
+    this.changeCellStatus(x, y, this.MOUSE_LEAVE);
+  }
+
+  render() {
+    // <img src="images/people/man.svg" style={{top: '-200px', left: '100px'}} />
+    // <img src="images/people/woman.svg" style={{top: '-150px', left: '400px'}} />
+    // <img src="images/people/woman.svg" style={{top: '-220px', left: '500px'}} />
 
     return (
       <div id="showroom">
@@ -35,14 +91,10 @@ class App extends React.Component {
         <div id="stage">
           <div id="canvas">
           </div>
-          <div id="floor">
-            <div id="grid">
-              {grid}
-            </div>
-            <img src="images/people/man.svg" style={{top: '-200px', left: '100px'}} />
-            <img src="images/people/woman.svg" style={{top: '-150px', left: '400px'}} />
-            <img src="images/people/woman.svg" style={{top: '-220px', left: '500px'}} />
-          </div>
+          <Floor grid={this.state.grid}
+                 onMouseEnterCell={this._mouseEnterCell.bind(this)}
+                 onMouseLeaveCell={this._mouseLeaveCell.bind(this)}>
+          </Floor>
         </div>
         <div className="wall">
           <img src="images/walls/wall-right.svg" />
@@ -55,8 +107,9 @@ class App extends React.Component {
             <h1>Project ImageMath</h1>
             <h2>Virtual Prototype</h2>
             <br/>
-            Built on <a href="http://facebook.github.io/react/">React</a> written in JSX/ES6
-            with <a href="http://sass-lang.com/">SASS</a>
+            Built on <a href="http://facebook.github.io/react/">React</a> written in JSX/ES6<br/>
+            3D effects using CSS3, written in <a href="http://sass-lang.com/">SASS</a><br/>
+            Open Source on <a href="https://github.com/neopostmodern/Project-ImageMath/tree/master/Prototype">GitHub</a>
             <br/>
             <br/>
             © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a>

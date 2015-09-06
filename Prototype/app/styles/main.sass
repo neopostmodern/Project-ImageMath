@@ -72,8 +72,15 @@ $CANVAS-MARGIN: 50px
       width: $CANVAS-SIZE / 10
       height: $CANVAS-SIZE / 10
 
-      &:hover
+      &.active
         background-color: lightgray
+
+    //&:hover
+    //  background-color: lightgray
+
+  .human
+    pointer-events: none
+
 
   img
     position: absolute
@@ -89,6 +96,7 @@ $CANVAS-MARGIN: 50px
 .wall
   position: relative
   width: 200px
+  pointer-events: none
 
   img
     position: absolute
