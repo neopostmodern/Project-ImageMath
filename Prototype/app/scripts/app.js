@@ -67,6 +67,14 @@ class App extends React.Component {
     }
   }
 
+  _toggleCell(x, y) {
+    if (this.state.grid[x][y]) {
+      this.changeCellStatus(x, y, this.DEACTIVATE);
+    } else {
+      this.changeCellStatus(x, y, this.ACTIVATE);
+    }
+  }
+
   _mouseEnterCell(x, y) {
     this.setState({
       hoveredCell: { x: x, y: y }
@@ -100,7 +108,8 @@ class App extends React.Component {
           <Floor grid={this.state.grid}
                  hoveredCell={this.state.hoveredCell}
                  onMouseEnterCell={this._mouseEnterCell.bind(this)}
-                 onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}>
+                 onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}
+                 onToggleCell={this._toggleCell.bind(this)}>
           </Floor>
         </div>
         <div className="wall">

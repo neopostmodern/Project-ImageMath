@@ -43,55 +43,7 @@ $CANVAS-MARGIN: 50px
 
   margin: 0 $CANVAS-MARGIN $CANVAS-MARGIN
 
-#floor
-  position: relative
-
-  perspective: 1800px
-  perspective-origin: top
-  transform-style: preserve-3d
-
-  #grid
-    font-size: 0
-
-    position: absolute
-    top: -$CANVAS-SIZE
-    left: $CANVAS-MARGIN
-
-    width: $CANVAS-SIZE
-    height: $CANVAS-SIZE
-
-    border: 2px green solid
-
-    transform: rotateX(-100deg) translateY(-65px)
-    transform-origin: 50% 100%
-
-    .cell
-      display: inline-block
-      box-sizing: border-box
-
-      width: $CANVAS-SIZE / 10
-      height: $CANVAS-SIZE / 10
-
-      &.active
-        background-color: darkgray
-      &.hovered
-        background-color: lightgray
-
-    //&:hover
-    //  background-color: lightgray
-
-  .human
-    pointer-events: none
-
-
-  img
-    position: absolute
-
-    height: 300px
-
-    opacity: 0.8
-
-    pointer-events: none
+@import floor
 
 
 
