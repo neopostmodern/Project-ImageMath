@@ -34,18 +34,9 @@ body
 #stage
   width: 700px
 
-$CANVAS-SIZE: 600px
-$CANVAS-MARGIN: 50px
-#canvas
-  width: $CANVAS-SIZE
-  height: $CANVAS-SIZE
-  background-color: deeppink
-
-  margin: 0 $CANVAS-MARGIN $CANVAS-MARGIN
-
+@import drawing
+@import canvas
 @import floor
-
-
 
 .wall
   position: relative
@@ -67,7 +58,7 @@ $PANEL-MARGIN: 50px
   &.left
     margin-right: $PANEL-MARGIN
 
-#info
+.info
   font-family: "Source Sans Pro", sans-serif
   //font-weight: 300
 

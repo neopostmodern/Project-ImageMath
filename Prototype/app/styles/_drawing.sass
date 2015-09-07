@@ -1,0 +1,22 @@
+.drawing
+  position: relative
+
+  width: 100%
+  height: 100%
+
+.drawing-slice
+  position: absolute
+
+  background-size: cover
+  opacity: 0.6
+  mix-blend-mode: screen
+
+  .vertical &
+    height: 100%
+    width: 10%
+    top: 0
+
+  .horizontal &
+    height: 10%
+    width: 100%
+    left: 0
