@@ -11,9 +11,9 @@ export default class Drawing extends React.Component {
         {props.grid.map(function (row, y) {
           return row.map(function (cell, x) {
             let cellHovered = props.hoveredCell
-              && props.hoveredCell.x === x
-              && props.hoveredCell.y === y;
-            if (!(cell === 1 || cellHovered)) {
+              && props.hoveredCell.x === y // this is the crossed properties!
+              && props.hoveredCell.y === x; // no idea why, but it works.
+            if (!(cell === 1 || cellHovered)) { // skip inactive cells
               return;
             }
 
