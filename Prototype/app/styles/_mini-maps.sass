@@ -1,0 +1,17 @@
+$MINI-MAP-SIZE: 200px
+.mini-map
+  width: $MINI-MAP-SIZE
+  height: $MINI-MAP-SIZE
+
+  border: gray 2px solid
+  margin-bottom: 10px
+
+#mini-grid
+  font-size: 0 // removes fake-margins/paddings
+  .cell
+    display: inline-block
+    height: $MINI-MAP-SIZE / 10
+    width: $MINI-MAP-SIZE / 10
+
+    &.active
+      background-color: gray

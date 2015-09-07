@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 
 import Floor from './components/floor.js';
+import MiniGrid from './components/mini-grid.js';
 
 class App extends React.Component {
   get DEACTIVATE () { return 'deactivate'; };
@@ -100,8 +101,8 @@ class App extends React.Component {
           <img src="images/walls/wall-right.svg" />
         </div>
         <div className="panel right">
-          <div className="mini-map">
-          </div>
+          <MiniGrid grid={this.state.grid}>
+          </MiniGrid>
 
           <div id="info">
             <h1>Project ImageMath</h1>
