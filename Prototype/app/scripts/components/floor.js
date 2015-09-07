@@ -5,18 +5,20 @@ export default class Floor extends React.Component {
   render () {
     let grid = [];
     let humans = [];
-    for (let y = 0; y < 10; y++) {
+    for (let inverted_y = 0; inverted_y < 10; inverted_y++) {
+      let y = 9 - inverted_y;
       let cells = [];
 
       for (let x = 0; x < 10; x++) {
         if (this.props.grid[x][y]) {
           let position = {
             position : 'absolute',
-            top : -120 - y * 17.5, // -270 to -120
+            top : -120 - inverted_y * 17.5, // -270 to -120
             //left : -135 + x * 93 // -135 to 702 [bottom]
-            //left : -5 + x * 64 // -135 to 702 [bottom]
-            left : (-135 + y * 13) + x * (93 - y * 2.9) // -135 to 702 [bottom]
+            //left : -5 + x * 64 // -5 to 702 [bottom]
+            left : (-135 + inverted_y * 13) + x * (93 - inverted_y * 2.9) // -135 to 702 [bottom]
           };
+
           humans.push(<img className='human' style={position} src="images/people/man.svg" />);
         }
 
