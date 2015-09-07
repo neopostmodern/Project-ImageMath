@@ -19,7 +19,9 @@ export default class MiniGrid extends React.Component {
 
         cells.push(
           <div className={classes}
-               key={'mg-' + y + '-' + x}>
+               key={'mg-' + y + '-' + x}
+               onMouseEnter={this.props.onMouseEnterCell.bind(null, x, y)}
+               onClick={this.props.onToggleCell.bind(null, x, y)}>
             {cellContent}
           </div>
         );
@@ -29,7 +31,9 @@ export default class MiniGrid extends React.Component {
     }
 
     return (
-      <div className="mini-map" id="mini-grid">
+      <div className="mini-map"
+           id="mini-grid"
+           onMouseLeave={this.props.onMouseLeaveGrid.bind(null)}>
         {grid}
       </div>
     );

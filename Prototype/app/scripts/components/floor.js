@@ -32,7 +32,7 @@ export default class Floor extends React.Component {
 
         cells.push(
           <div className={classes}
-               key={y + '-' + x}
+               key={'f-' + y + '-' + x}
                onMouseEnter={this.props.onMouseEnterCell.bind(null, x, y)}
                onClick={this.props.onToggleCell.bind(null, x, y)}>
           </div>);

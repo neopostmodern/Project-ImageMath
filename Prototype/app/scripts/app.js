@@ -168,7 +168,10 @@ class App extends React.Component {
         </div>
         <div className="panel right">
           <MiniGrid grid={this.state.grid}
-                    hoveredCell={this.state.hoveredCell}>
+                    hoveredCell={this.state.hoveredCell}
+                    onMouseEnterCell={this._mouseEnterCell.bind(this)}
+                    onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}
+                    onToggleCell={this._toggleCell.bind(this)}>
           </MiniGrid>
 
           <div className="info">

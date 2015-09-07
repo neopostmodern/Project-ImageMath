@@ -8,13 +8,12 @@ $MINI-MAP-SIZE: 200px
 
 #mini-grid
   font-size: 0 // removes fake-margins/paddings
+  cursor: none
+
   .cell
     display: inline-block
     height: $MINI-MAP-SIZE / 10
     width: $MINI-MAP-SIZE / 10
-
-    &.active
-      background-color: #444
 
     .human-indicator
       border-radius: $MINI-MAP-SIZE / 20
@@ -22,3 +21,13 @@ $MINI-MAP-SIZE: 200px
 
       width: 100%
       height: 100%
+
+    &.active
+      background-color: #444
+
+      .human-indicator
+        background-color: darkred
+        width: 80%
+        height: 80%
+        margin-top: 10%
+        margin-left: 10%
