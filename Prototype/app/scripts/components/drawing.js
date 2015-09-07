@@ -4,7 +4,6 @@ import classNames from 'classnames';
 export default class Drawing extends React.Component {
   render () {
     let props = this.props;
-    console.dir(this.props);
     let vertical = this.props.orientation == Drawing.VERTICAL;
 
     return (
