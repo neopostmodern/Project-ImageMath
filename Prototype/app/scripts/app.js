@@ -9,7 +9,10 @@ import Drawing from './components/drawing.js';
 import MiniGrid from './components/mini-grid.js';
 
 const MINIMUM_HEIGHT = 850;
-const MINIMUM_WIDTH = 1540;
+const MINIMUM_WIDTH = 850;
+
+const RECOMMENDED_HEIGHT = 850;
+const RECOMMENDED_WIDTH = 1450;
 
 class App extends React.Component {
   get DEACTIVATE () { return 'deactivate'; };
@@ -100,15 +103,28 @@ class App extends React.Component {
   }
 
   render() {
-    if ((this.state.windowSize.width < MINIMUM_WIDTH || this.state.windowSize.height < MINIMUM_HEIGHT)
-          && !this.state.ignoreScreenSizeWarning) {
+    let windowBelowMinimum = this.state.windowSize.width < MINIMUM_WIDTH
+      || this.state.windowSize.height < MINIMUM_HEIGHT;
+    let windowBelowRecommended = this.state.windowSize.width < RECOMMENDED_WIDTH
+      || this.state.windowSize.height < RECOMMENDED_HEIGHT;
+
+    if ((windowBelowMinimum || windowBelowRecommended) && !this.state.ignoreScreenSizeWarning) {
+      let warnings = [<div>Current size is {this.state.windowSize.width}x{this.state.windowSize.height}</div>];
+      if (windowBelowMinimum) {
+        warnings.push(<div>Required minimum is {MINIMUM_WIDTH}x{MINIMUM_HEIGHT}</div>);
+      }
+      if (windowBelowRecommended) {
+        warnings.push(<div>Recommended is {RECOMMENDED_WIDTH}x{RECOMMENDED_HEIGHT}</div>);
+      }
+
       return <div style={{marginLeft: '5vw'}}>
-        <h1>You're browser is too small.</h1>
+        <h1>Your browser is too small.</h1>
         Maximize the window or try going fullscreen (F11).<br/>
         This experience has not been designed for mobile devices.
         <br/><br/>
-        <i>Current size is {this.state.windowSize.width}x{this.state.windowSize.height}<br/>
-          Required minimum is {MINIMUM_WIDTH}x{MINIMUM_HEIGHT}</i>
+        <i>
+          {warnings}
+        </i>
         <br/>
         <br/>
         _________
@@ -125,13 +141,15 @@ class App extends React.Component {
       </div>
     }
 
-    return (
-      <div id="showroom">
+    let panels = [];
+
+    if (!windowBelowRecommended) {
+      panels.push(
         <div className="panel left">
           <div className="mini-map">
             <Drawing grid={this.state.grid}
                      hoveredCell={this.state.hoveredCell}
-                     src='images/img/quito.jpg'
+                     src='images/img/knicklichter.jpg'
                      orientation={Drawing.HORIZONTAL}>
             </Drawing>
           </div>
@@ -149,23 +167,35 @@ class App extends React.Component {
             Click again to remove her.
           </div>
         </div>
-        <div className="wall">
-          <img src="images/walls/wall-left.svg" />
-        </div>
-        <div id="stage">
-          <Canvas grid={this.state.grid}
-                  hoveredCell={this.state.hoveredCell}>
-          </Canvas>
-          <Floor grid={this.state.grid}
-                 hoveredCell={this.state.hoveredCell}
-                 onMouseEnterCell={this._mouseEnterCell.bind(this)}
-                 onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}
-                 onToggleCell={this._toggleCell.bind(this)}>
-          </Floor>
-        </div>
-        <div className="wall">
-          <img src="images/walls/wall-right.svg" />
-        </div>
+      );
+    }
+
+    panels.push(
+      <div className="wall">
+        <img src="images/walls/wall-left.svg"/>
+      </div>
+    );
+    panels.push(
+      <div id="stage">
+        <Canvas grid={this.state.grid}
+                hoveredCell={this.state.hoveredCell}>
+        </Canvas>
+        <Floor grid={this.state.grid}
+               hoveredCell={this.state.hoveredCell}
+               onMouseEnterCell={this._mouseEnterCell.bind(this)}
+               onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}
+               onToggleCell={this._toggleCell.bind(this)}>
+        </Floor>
+      </div>
+    );
+    panels.push(
+      <div className="wall">
+        <img src="images/walls/wall-right.svg"/>
+      </div>
+    );
+
+    if (!windowBelowRecommended) {
+      panels.push(
         <div className="panel right">
           <MiniGrid grid={this.state.grid}
                     hoveredCell={this.state.hoveredCell}
@@ -176,6 +206,7 @@ class App extends React.Component {
 
           <div className="info">
             <h1>Project ImageMath</h1>
+
             <h2>Virtual Prototype</h2>
             <br/>
             Built on <a href="http://facebook.github.io/react/">React</a> written in JSX/ES6<br/>
@@ -186,6 +217,12 @@ class App extends React.Component {
             © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a>
           </div>
         </div>
+      );
+    }
+
+    return (
+      <div id="showroom">
+        {panels}
       </div>
     );
   }
