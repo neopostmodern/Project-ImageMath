@@ -26,7 +26,8 @@ class App extends React.Component {
     //grid[0][3] = 1;
 
     this.state = {
-      grid: grid
+      grid: grid,
+      hoveredCell: null
     };
   }
 
@@ -67,10 +68,14 @@ class App extends React.Component {
   }
 
   _mouseEnterCell(x, y) {
-    this.changeCellStatus(x, y, this.MOUSE_ENTER);
+    this.setState({
+      hoveredCell: { x: x, y: y }
+    });
   }
-  _mouseLeaveCell(x, y) {
-    this.changeCellStatus(x, y, this.MOUSE_LEAVE);
+  _mouseLeaveGrid() {
+    this.setState({
+      hoveredCell: null
+    })
   }
 
   render() {
@@ -93,15 +98,17 @@ class App extends React.Component {
           <div id="canvas">
           </div>
           <Floor grid={this.state.grid}
+                 hoveredCell={this.state.hoveredCell}
                  onMouseEnterCell={this._mouseEnterCell.bind(this)}
-                 onMouseLeaveCell={this._mouseLeaveCell.bind(this)}>
+                 onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}>
           </Floor>
         </div>
         <div className="wall">
           <img src="images/walls/wall-right.svg" />
         </div>
         <div className="panel right">
-          <MiniGrid grid={this.state.grid}>
+          <MiniGrid grid={this.state.grid}
+                    hoveredCell={this.state.hoveredCell}>
           </MiniGrid>
 
           <div id="info">

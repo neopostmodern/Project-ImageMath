@@ -10,7 +10,10 @@ export default class Floor extends React.Component {
       let cells = [];
 
       for (let x = 0; x < 10; x++) {
-        if (this.props.grid[x][y]) {
+        let cellHovered = this.props.hoveredCell && this.props.hoveredCell.x == x && this.props.hoveredCell.y == y;
+        let cellActive = this.props.grid[x][y];
+
+        if (cellActive || cellHovered) {
           let position = {
             position : 'absolute',
             top : -120 - inverted_y * 17.5, // -270 to -120
@@ -22,13 +25,15 @@ export default class Floor extends React.Component {
           humans.push(<img className='human' style={position} src="images/people/man.svg" />);
         }
 
-        let classes = classNames('cell', { 'active' : this.props.grid[x][y] > 0});
+        let classes = classNames('cell',
+          { 'active' : cellActive,
+            'hovered': cellHovered }
+        );
 
         cells.push(
           <div className={classes}
                key={y + '-' + x}
-               onMouseEnter={this.props.onMouseEnterCell.bind(null, x, y)}
-               onMouseLeave={this.props.onMouseLeaveCell.bind(null, x, y)}>
+               onMouseEnter={this.props.onMouseEnterCell.bind(null, x, y)}>
           </div>);
       }
 
@@ -37,7 +42,7 @@ export default class Floor extends React.Component {
 
     return (
       <div id="floor">
-        <div id="grid">
+        <div id="grid" onMouseLeave={this.props.onMouseLeaveGrid.bind(null)}>
           {grid}
         </div>
         {humans}

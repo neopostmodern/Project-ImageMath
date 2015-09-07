@@ -9,14 +9,18 @@ export default class MiniGrid extends React.Component {
       let cells = [];
 
       for (let x = 0; x < 10; x++) {
-        //if (this.props.grid[x][y]) {
-        //}
+        let cellHovered = this.props.hoveredCell && this.props.hoveredCell.x == x && this.props.hoveredCell.y == y;
+        let cellContent;
+        if (cellHovered) {
+          cellContent = <div className="human-indicator"></div>;
+        }
 
-        let classes = classNames('cell', { 'active' : this.props.grid[x][y] > 0});
+        let classes = classNames('cell', { 'active' : this.props.grid[x][y] == 1});
 
         cells.push(
           <div className={classes}
                key={'mg-' + y + '-' + x}>
+            {cellContent}
           </div>);
       }
 
