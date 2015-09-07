@@ -9,7 +9,7 @@ export default class Canvas extends React.Component {
       <div id="canvas">
         <Drawing grid={this.props.grid}
                  hoveredCell={this.props.hoveredCell}
-                 src='images/img/quito.jpg'
+                 src='images/img/knicklichter.jpg'
                  orientation={Drawing.HORIZONTAL}>
         </Drawing>
         <Drawing grid={this.props.grid}
