@@ -204,7 +204,8 @@ class App extends React.Component {
       Open Source on <a href="https://github.com/neopostmodern/Project-ImageMath/tree/master/Prototype">GitHub</a>
       <br/>
       <br/>
-      © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a>
+      © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a><br/>
+      <i>v1.1 (2015-09-10)</i>
     </div>;
     let panels = [];
 
