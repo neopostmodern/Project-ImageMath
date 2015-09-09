@@ -161,7 +161,7 @@ class App extends React.Component {
           <div className="mini-map">
             <Drawing grid={this.state.grid}
                      hoveredCell={this.state.hoveredCell}
-                     src='images/img/knicklichter.jpg'
+                     src='images/img/cheshire-1.jpg'
                      orientation={Drawing.HORIZONTAL}>
             </Drawing>
           </div>
