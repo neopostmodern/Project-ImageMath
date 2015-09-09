@@ -14,6 +14,47 @@ const MINIMUM_WIDTH = 850;
 const RECOMMENDED_HEIGHT = 850;
 const RECOMMENDED_WIDTH = 1450;
 
+const AvailableImages = [
+  {
+    id: 1,
+    name: 'Fragezeichen',
+    url: 'images/img/fragezeichen.jpg'
+  },
+  {
+    id: 2,
+    name: 'Cheshire Cat (1951)',
+    url: 'images/img/cheshire-1.jpg'
+  },
+  {
+    id: 3,
+    name: 'Cheshire Cat (2009)', // todo: confirm release date
+    url: 'images/img/cat.jpg'
+  },
+  {
+    id: 4,
+    name: 'Glowing Disco Sticks',
+    url: 'images/img/knicklichter.jpg'
+  },
+  {
+    id: 5,
+    name: 'Traffic light',
+    url: 'images/img/quito.jpg'
+  },
+  {
+    id: 6,
+    name: 'Modern architecture',
+    url: 'images/img/madrid.jpg'
+  }
+];
+AvailableImages.get = function (id) {
+  return AvailableImages.filter((image) => image.id === id)[0];
+};
+
+const PreselectedImageIds = {
+  vertical: 1,
+  horizontal: 2
+};
+
 class App extends React.Component {
   get DEACTIVATE () { return 'deactivate'; };
   get ACTIVATE () { return 'activate'; };
@@ -34,7 +75,11 @@ class App extends React.Component {
     this.state = {
       grid: grid,
       hoveredCell: null,
-      windowSizeInsufficient: { x: 0, y: 0 }
+      windowSizeInsufficient: { x: 0, y: 0 },
+      images: {
+        vertical: AvailableImages.get(PreselectedImageIds.vertical),
+        horizontal: AvailableImages.get(PreselectedImageIds.horizontal)
+      }
     };
   }
 
@@ -102,6 +147,14 @@ class App extends React.Component {
     })
   }
 
+  _changeImage(orientation, event) {
+    let selectedId = parseInt(event.target.selectedOptions[0].value);
+    let selectedImage = AvailableImages.get(selectedId);
+    let change = {};
+    change[orientation] = { $set: selectedImage };
+    this.setState({images: React.addons.update(this.state.images, change)});
+  }
+
   render() {
     const windowBelowMinimum = this.state.windowSize.width < MINIMUM_WIDTH
       || this.state.windowSize.height < MINIMUM_HEIGHT;
@@ -161,17 +214,26 @@ class App extends React.Component {
           <div className="mini-map">
             <Drawing grid={this.state.grid}
                      hoveredCell={this.state.hoveredCell}
-                     src='images/img/cheshire-1.jpg'
+                     src={this.state.images.horizontal.url}
                      orientation={Drawing.HORIZONTAL}>
             </Drawing>
           </div>
-          <div className="mini-map">
+          <select defaultValue={PreselectedImageIds.horizontal}
+                  onChange={this._changeImage.bind(this, Drawing.HORIZONTAL)}>
+            {AvailableImages.map((image) => <option value={image.id}>{image.name}</option>)}
+          </select>
+
+          <div className="mini-map" style={{marginTop: '2rem'}}>
             <Drawing grid={this.state.grid}
                      hoveredCell={this.state.hoveredCell}
-                     src='images/img/fragezeichen.jpg'
+                     src={this.state.images.vertical.url}
                      orientation={Drawing.VERTICAL}>
             </Drawing>
           </div>
+          <select defaultValue={PreselectedImageIds.vertical}
+                  onChange={this._changeImage.bind(this, Drawing.VERTICAL)}>
+            {AvailableImages.map((image) => <option value={image.id}>{image.name}</option>)}
+          </select>
 
           <div className="info" style={{textAlign: 'right'}}>
             Hover over the floor to move.<br/>
@@ -190,7 +252,8 @@ class App extends React.Component {
     panels.push(
       <div id="stage">
         <Canvas grid={this.state.grid}
-                hoveredCell={this.state.hoveredCell}>
+                hoveredCell={this.state.hoveredCell}
+                images={{vertical: this.state.images.vertical.url, horizontal: this.state.images.horizontal.url}}>
         </Canvas>
         <Floor grid={this.state.grid}
                hoveredCell={this.state.hoveredCell}
