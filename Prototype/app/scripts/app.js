@@ -103,10 +103,11 @@ class App extends React.Component {
   }
 
   render() {
-    let windowBelowMinimum = this.state.windowSize.width < MINIMUM_WIDTH
+    const windowBelowMinimum = this.state.windowSize.width < MINIMUM_WIDTH
       || this.state.windowSize.height < MINIMUM_HEIGHT;
-    let windowBelowRecommended = this.state.windowSize.width < RECOMMENDED_WIDTH
+    const windowBelowRecommended = this.state.windowSize.width < RECOMMENDED_WIDTH
       || this.state.windowSize.height < RECOMMENDED_HEIGHT;
+    const isWindowWide = this.state.windowSize.width >= RECOMMENDED_WIDTH;
 
     if ((windowBelowMinimum || windowBelowRecommended) && !this.state.ignoreScreenSizeWarning) {
       let warnings = [<div>Current size is {this.state.windowSize.width}x{this.state.windowSize.height}</div>];
@@ -141,9 +142,20 @@ class App extends React.Component {
       </div>
     }
 
+    let info = <div className="info">
+      <h1>Project ImageMath</h1>
+      <h2>Virtual Prototype</h2>
+      <br/>
+      Built on <a href="http://facebook.github.io/react/">React</a> written in JSX/ES6<br/>
+      3D effects using CSS3, written in <a href="http://sass-lang.com/">SASS</a><br/>
+      Open Source on <a href="https://github.com/neopostmodern/Project-ImageMath/tree/master/Prototype">GitHub</a>
+      <br/>
+      <br/>
+      © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a>
+    </div>;
     let panels = [];
 
-    if (!windowBelowRecommended) {
+    if (isWindowWide) {
       panels.push(
         <div className="panel left">
           <div className="mini-map">
@@ -194,7 +206,7 @@ class App extends React.Component {
       </div>
     );
 
-    if (!windowBelowRecommended) {
+    if (isWindowWide) {
       panels.push(
         <div className="panel right">
           <MiniGrid grid={this.state.grid}
@@ -204,18 +216,7 @@ class App extends React.Component {
                     onToggleCell={this._toggleCell.bind(this)}>
           </MiniGrid>
 
-          <div className="info">
-            <h1>Project ImageMath</h1>
-
-            <h2>Virtual Prototype</h2>
-            <br/>
-            Built on <a href="http://facebook.github.io/react/">React</a> written in JSX/ES6<br/>
-            3D effects using CSS3, written in <a href="http://sass-lang.com/">SASS</a><br/>
-            Open Source on <a href="https://github.com/neopostmodern/Project-ImageMath/tree/master/Prototype">GitHub</a>
-            <br/>
-            <br/>
-            © 2015 <a href="http://neopostmodern.com/">NEO POST MODERN</a>
-          </div>
+          {info}
         </div>
       );
     }
