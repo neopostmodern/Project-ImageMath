@@ -16,10 +16,11 @@ export default class Floor extends React.Component {
         if (cellActive || cellHovered) {
           let position = {
             position : 'absolute',
-            top : -120 - inverted_y * 17.5, // -270 to -120
+            //top : -120 - inverted_y * 17.5, // -270 to -120
+            top : 0.638 * y * y + 11.694 * y - 277, // [0, -277] / [4, -220] / [9, -120]
             //left : -135 + x * 93 // -135 to 702 [bottom]
             //left : -5 + x * 64 // -5 to 702 [bottom]
-            left : (-135 + inverted_y * 13) + x * (93 - inverted_y * 2.9) // -135 to 702 [bottom]
+            left : (-135 + inverted_y * 15) + x * (93 - inverted_y * 3.3)
           };
 
           humans.push(<img className='human' style={position} src="images/people/man.svg" />);
