@@ -3,7 +3,9 @@ import classNames from 'classnames';
 
 const HumanImages = [
   "images/people/man.svg",
-  "images/people/woman.svg"
+  "images/people/woman.svg",
+  "images/people/child-f.svg",
+  "images/people/child-m.svg"
 ];
 
 export default class Floor extends React.Component {
