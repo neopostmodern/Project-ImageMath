@@ -44,6 +44,11 @@ const AvailableImages = [
     id: 6,
     name: 'Modern architecture',
     url: 'images/img/madrid.jpg'
+  },
+  {
+    id: 7,
+    name: 'Space selfie',
+    url: 'images/img/space-selfie.jpg'
   }
 ];
 AvailableImages.get = function (id) {
