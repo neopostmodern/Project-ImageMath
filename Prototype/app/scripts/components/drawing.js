@@ -1,6 +1,30 @@
 import React from 'react';
 import classNames from 'classnames';
 
+class ImageSlice extends React.Component {
+  render () {
+    let props = this.props;
+    let {x, y} = props.position;
+    let style = {
+      backgroundImage: 'url(' + props.src + ')'
+    };
+
+    if (props.orientation === Drawing.VERTICAL) {
+      Object.assign(style, {
+        left: y * 10 + '%',
+        backgroundPosition: x * 10 + '%' + ' 0%'
+      });
+    } else {
+      Object.assign(style, {
+        top: x * 10 + '%',
+        backgroundPosition: '0% ' + y * 10 + '%'
+      });
+    }
+
+    return <div style={style} className='drawing-slice'></div>;
+  }
+}
+
 export default class Drawing extends React.Component {
   render () {
     let props = this.props;
@@ -17,25 +41,11 @@ export default class Drawing extends React.Component {
               return;
             }
 
-            let style = {
-              backgroundImage: 'url(' + props.src + ')'
-            };
-
-            if (props.orientation === Drawing.VERTICAL) {
-              Object.assign(style, {
-                left: y * 10 + '%',
-                backgroundPosition: x * 10 + '%' + ' 0%'
-              });
-            } else {
-              Object.assign(style, {
-                top: x * 10 + '%',
-                backgroundPosition: '0% ' + y * 10 + '%'
-              });
-            }
-
-            return <div key={'d-' + y + '-' + x}
-                        style={style}
-                        className='drawing-slice'></div>;
+            return <ImageSlice
+              key={'d-' + y + '-' + x}
+              src={props.src}
+              position={{x, y}}
+              orientation={props.orientation} />
           });
         })}
       </div>
