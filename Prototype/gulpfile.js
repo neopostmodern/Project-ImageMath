@@ -73,6 +73,12 @@ gulp.task('images', function() {
     .pipe($.size());
 });
 
+gulp.task('videos', function() {
+  return gulp.src(['app/videos/*'])
+    .pipe(gulp.dest('dist/videos'))
+    .pipe($.size());
+});
+
 gulp.task('clear-image-cache', function() {
   // Still pass the files to clear cache for
   gulp.src('app/images/**/*')
@@ -152,5 +158,6 @@ gulp.task('watch', sync(['clean-bundle', 'serve']), function() {
   gulp.watch('app/*.html', ['html']);
   gulp.watch('app/styles/*.sass', ['styles']);
   gulp.watch('app/images/**/*', ['images']);
+  gulp.watch('app/videos/*', ['videos']);
   gulp.watch('app/fonts/*', ['fonts']);
 });
