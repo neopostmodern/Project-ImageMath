@@ -69,6 +69,7 @@ export default class Floor extends React.Component {
           }
 
           humans.push(<img className='human'
+                           key={'h-' + y + '-' + x}
                            style={position}
                            src={humanImage} />);
         }

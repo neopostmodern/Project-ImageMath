@@ -168,12 +168,12 @@ class App extends React.Component {
     const isWindowWide = this.state.windowSize.width >= RECOMMENDED_WIDTH;
 
     if ((windowBelowMinimum || windowBelowRecommended) && !this.state.ignoreScreenSizeWarning) {
-      let warnings = [<div>Current size is {this.state.windowSize.width}x{this.state.windowSize.height}</div>];
+      let warnings = [<div key="w-g">Current size is {this.state.windowSize.width}x{this.state.windowSize.height}</div>];
       if (windowBelowMinimum) {
-        warnings.push(<div>Required minimum is {MINIMUM_WIDTH}x{MINIMUM_HEIGHT}</div>);
+        warnings.push(<div key="w-min">Required minimum is {MINIMUM_WIDTH}x{MINIMUM_HEIGHT}</div>);
       }
       if (windowBelowRecommended) {
-        warnings.push(<div>Recommended is {RECOMMENDED_WIDTH}x{RECOMMENDED_HEIGHT}</div>);
+        warnings.push(<div key="w-max">Recommended is {RECOMMENDED_WIDTH}x{RECOMMENDED_HEIGHT}</div>);
       }
 
       return <div style={{marginLeft: '5vw'}}>
@@ -216,7 +216,7 @@ class App extends React.Component {
 
     if (isWindowWide) {
       panels.push(
-        <div className="panel left">
+        <div className="panel left" key="panel-left">
           <div className="mini-map">
             <Drawing grid={this.state.grid}
                      hoveredCell={this.state.hoveredCell}
@@ -226,7 +226,7 @@ class App extends React.Component {
           </div>
           <select defaultValue={PreselectedImageIds.horizontal}
                   onChange={this._changeImage.bind(this, Drawing.HORIZONTAL)}>
-            {AvailableImages.map((image) => <option value={image.id}>{image.name}</option>)}
+            {AvailableImages.map((image) => <option value={image.id} key={'img-h_' + image.id}>{image.name}</option>)}
           </select>
 
           <div className="mini-map" style={{marginTop: '2rem'}}>
@@ -238,7 +238,7 @@ class App extends React.Component {
           </div>
           <select defaultValue={PreselectedImageIds.vertical}
                   onChange={this._changeImage.bind(this, Drawing.VERTICAL)}>
-            {AvailableImages.map((image) => <option value={image.id}>{image.name}</option>)}
+            {AvailableImages.map((image) => <option value={image.id} key={'img-v_' + image.id}>{image.name}</option>)}
           </select>
 
           <div className="info" style={{textAlign: 'right'}}>
@@ -251,12 +251,12 @@ class App extends React.Component {
     }
 
     panels.push(
-      <div className="wall">
+      <div className="wall" key="wall-left">
         <img src="images/walls/wall-left.svg"/>
       </div>
     );
     panels.push(
-      <div id="stage">
+      <div id="stage" key="stage">
         <Canvas grid={this.state.grid}
                 hoveredCell={this.state.hoveredCell}
                 images={{vertical: this.state.images.vertical.url, horizontal: this.state.images.horizontal.url}}>
@@ -270,31 +270,27 @@ class App extends React.Component {
       </div>
     );
     panels.push(
-      <div className="wall">
+      <div className="wall"
+           key="wall-right">
         <img src="images/walls/wall-right.svg"/>
       </div>
     );
 
     if (isWindowWide) {
       panels.push(
-        <div className="panel right">
+        <div className="panel right"
+             key="panel-right">
           <MiniGrid grid={this.state.grid}
                     hoveredCell={this.state.hoveredCell}
                     onMouseEnterCell={this._mouseEnterCell.bind(this)}
                     onMouseLeaveGrid={this._mouseLeaveGrid.bind(this)}
-                    onToggleCell={this._toggleCell.bind(this)}>
-          </MiniGrid>
-
+                    onToggleCell={this._toggleCell.bind(this)} />
           {info}
         </div>
       );
     }
 
-    return (
-      <div id="showroom">
-        {panels}
-      </div>
-    );
+    return <div id="showroom" key="showroom"> {panels} </div>;
   }
 }
 
