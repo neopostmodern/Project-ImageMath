@@ -7,14 +7,10 @@ import httplib2
 import argparse
 import sys
 
-def server_call(method, parameters):
-    def callback(error, response):
-        print(" > ")
-        if error:
-            print("Error: ", error)
-        else:
-            print(response)
+# movement_filter = 0
 
+
+def server_call(method, parameters):
     parameters.insert(0, method)
     url = "http://localhost:4000/%s/%d/%d/%d" % tuple(parameters)
     if not ONLINE:
@@ -23,24 +19,27 @@ def server_call(method, parameters):
     if not ONLINE:
         return
 
+    # todo: move to socket based implementation for performance increase (no HTTP overhead)
     (result, response) = http.request(url, method="POST")
     if result.status != 200:
         print("Failed.")
         print(result)
 
+
 def activate_position(room, x, y):
-    print("Activating [%d] %d/%d..." % (room, x, y)) #, end='')
+    print("Activating [%d] %d/%d..." % (room, x, y))
     server_call('activate', [room, x, y])
 
+
 def deactivate_position(room, x, y):
-    print("Deactivating [%d] %d/%d..." % (room, x, y)) #, end='')
+    print("Deactivating [%d] %d/%d..." % (room, x, y))
     server_call('deactivate', [room, x, y])
+
 
 def main():
     print("Connection to server successful.")
     print("Human detection grid started...")
     last_positions = np.zeros((10, 10))
-
 
     ret, first_frame = cap.read()
     frame_size = (len(first_frame), len(first_frame[0]))
@@ -90,8 +89,8 @@ def main():
         contours_for_display = [contour + [[rectangle_offset, 0]] for contour in contours]
         cv2.fillPoly(contour_image, contours_for_display, (255, 0, 0))
         for index, contour in enumerate(contours_for_display):
-            print(contours_for_display)
-            print(contour)
+            # print(contours_for_display)
+            # print(contour)
             cv2.fillPoly(
                 rainbow_contour_image,
                 [np.array(contour)],
@@ -118,13 +117,9 @@ def main():
                         -1  # line width: fill
                     )
 
-                # cv2.recoverPose(moving_objects_image, ()
-
         last_positions = new_positions
 
-        # moving_objects_image = cv2.resize(moving_objects_image, (1000, 1000), -1)
         moving_objects_image = cv2.cvtColor(moving_objects_image, cv2.COLOR_GRAY2RGB)
-        # print(moving_objects_image[0, 0])
 
         cv2.rectangle(
             overlay,  # frame
@@ -133,7 +128,7 @@ def main():
             (0, 255, 0),  # color
             5  # line width
         )
-        #  = cv2.add(moving_objects_image, overlay)
+
         moving_objects_image = cv2.addWeighted(moving_objects_image, 0.6, contour_image, 0.5, 0.1)
         overlay = cv2.addWeighted(contour_image, 0.8, overlay, 0.8, 1.0)
         overlay = cv2.addWeighted(center_image, 0.8, overlay, 0.8, 1.0)
@@ -144,6 +139,9 @@ def main():
         cv2.imshow('Analysis (areas only)', rainbow_contour_image)
 
         k = cv2.waitKey(30) & 0xff
+        if k == 143:  # camera trigger
+            global movement_filter
+            movement_filter = cv2.createBackgroundSubtractorKNN()
         if k == 27:
             break
 
@@ -164,17 +162,19 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--video', action='store', type=int, default=0)
     parser.add_argument('-r', '--room', action='store', type=int, default=0)
     parser.add_argument('-s', '--size', action='store', type=int, default=10)
-    parser.add_argument('-x', '--offline', action='store', type=int, default=10)  # todo: implement as boolean flag
+    parser.add_argument('-x', '--offline', action='store_true')
     arguments = parser.parse_args(sys.argv[1:])
 
     VIDEO_ID = arguments.video
     ROOM = arguments.room
     SIZE = arguments.size
-    ONLINE = True # get from argument
+    ONLINE = not arguments.offline  # get from argument
 
     print("Initializing video...")
     print("Using camera #%d" % VIDEO_ID)
     cap = cv2.VideoCapture(VIDEO_ID)
+    ret, frame = cap.read()
+    cv2.imshow('Input (converted to grayscale)', frame)
     movement_filter = cv2.createBackgroundSubtractorKNN()
     print("Done.")
 
