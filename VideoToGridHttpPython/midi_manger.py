@@ -12,6 +12,8 @@ class MidiManager():
     SLIDER_1 = 3
     SLIDER_2 = 4
     SLIDER_3 = 5
+    SLIDER_4 = 6
+    SLIDER_5 = 7
 
     def __init__(self, ):
         self.input = rtmidi.MidiIn().open_port(1)

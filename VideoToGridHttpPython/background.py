@@ -8,29 +8,28 @@ import sys
 from capture_settings import camera_information
 from midi_manger import MidiManager
 
-class Abort:
-    def __init__(self):
-        self._abort = False
-
-    @property
-    def should_abort(self):
-        return self._abort
-
-    def abort(self):
-        self._abort = True
-
-GLOBAL_ABORT = Abort()
-
 
 class BackgroundSubtraction:
-    def __init__(self, background_images):
-        self.shape = background_images[0].shape
-        self.shape_bw = (self.shape[0], self.shape[1])
-        print("Created BackgroundSubtraction", self.shape, self.shape_bw)
+    def __init__(self, background_images=None):
         self._dynamic_factor = 1
-        self.set_background_image(background_images)
+        self.as_intensity = True
+        self.pre_filter_by_interval = True
+        self.filter_color = numpy.zeros(3, dtype=numpy.uint8)
 
-    def set_background_image(self, images):
+        self.show_debug_window = False
+
+        if background_images is None:
+            self._initialized = False
+            self._image_buffer = []
+        else:
+            self._initialized = True
+            self.set_background_images(background_images)
+            print("Created BackgroundSubtraction", self.shape, self.shape_bw)
+
+    def set_background_images(self, images):
+        self.shape = images[0].shape
+        self.shape_bw = (self.shape[0], self.shape[1])
+
         self._background_images = images
         self._mean_background = numpy.vstack(numpy.mean(self._background_images, axis=0)).astype(numpy.uint8)
         self._max_background = numpy.vstack(numpy.max(self._background_images, axis=0)).astype(numpy.uint8)
@@ -53,37 +52,85 @@ class BackgroundSubtraction:
         return self._background_dynamic * self._dynamic_factor
 
     def show_background_summary(self):
-        background_summary = numpy.zeros((self.shape[0] * 2, self.shape[1] * 2, self.shape[2]), dtype=numpy.uint8)
+        if not self.show_debug_window:
+            return
 
-        background_summary[:self.shape[0], :self.shape[1]] = self._min_background.reshape(self.shape)
-        cv2.putText(background_summary, "MINIMUM", (10, 20), cv2.FONT_HERSHEY_PLAIN, 1, 255)
+        tile_size = (self.shape[0] // 2, self.shape[1] // 2)
+        background_summary = numpy.zeros((self.shape[0], self.shape[1], self.shape[2]), dtype=numpy.uint8)
 
-        background_summary[:self.shape[0], self.shape[1]:] = self._max_background.reshape(self.shape)
-        cv2.putText(background_summary, "MAXIMUM", (self.shape[1] + 10, 20), cv2.FONT_HERSHEY_PLAIN, 1, 255)
+        def put_image(image, name, x, y):
+            colored = len(image.shape) == 2
+            if not colored:
+                image = numpy.tile(image, (3, 1)).transpose()
 
-        background_summary[self.shape[0]:, :self.shape[1]] = self._mean_background.reshape(self.shape)
-        cv2.putText(background_summary, "MEAN", (10, self.shape[0] + 20), cv2.FONT_HERSHEY_PLAIN, 1, 255)
+            image = image.reshape(self.shape)
+            image = cv2.resize(image, (image.shape[1] // 2, image.shape[0] // 2))  # half the size?
+            background_summary[
+                (x * tile_size[0]):((x + 1) * tile_size[0]),
+                (y * tile_size[1]):((y + 1) * tile_size[1])
+            ] = image
 
-        background_summary[self.shape[0]:, self.shape[1]:, 0] = self._adjusted_background_dynamic.reshape(self.shape_bw)
-        cv2.putText(background_summary, "DYNAMIC (%.2f)" % self._dynamic_factor, (self.shape[1] + 10, self.shape[0] + 20), cv2.FONT_HERSHEY_PLAIN, 1, 255)
+            cv2.putText(
+                background_summary,
+                name.upper(),
+                (y * tile_size[1] + 10, x * tile_size[0] + 20),
+                cv2.FONT_HERSHEY_PLAIN,
+                1,  # 1 rem size
+                255  # color: blue
+            )
+
+        put_image(self._min_background, "Minimum", 0, 0)
+        put_image(self._max_background, "Maximum", 1, 0)
+        put_image(self._mean_background, "Mean", 0, 1)
+        put_image(self._adjusted_background_dynamic * 2, "Dynamic (%.2f)" % self._dynamic_factor, 1, 1)
 
         cv2.imshow('Reference image summary', background_summary)
 
     def apply(self, image):
+        if not self._initialized:
+            self._image_buffer.append(image)
+            if len(self._image_buffer) >= 10:
+                self.set_background_images(self._image_buffer)
+                self._initialized = True
+
+            if self.as_intensity:
+                return numpy.zeros((image.shape[0], image.shape[1]), dtype=numpy.uint8)
+            else:
+                return numpy.zeros(image.shape, dtype=numpy.uint8)
+
         flat_image = numpy.vstack(image)
-        absdiff = cv2.absdiff(flat_image, self._mean_background)
-        mask = numpy.sum(numpy.logical_and(self._min_background < flat_image, flat_image < self._max_background), axis=1) >= 2
-        # mask = numpy.linalg.norm(flat_image, axis=1) <= self._adjusted_background_dynamic
+        difference = cv2.absdiff(flat_image, self._mean_background)
+        if self.pre_filter_by_interval:
+            mask = numpy.sum(numpy.logical_and(self._min_background < flat_image, flat_image < self._max_background), axis=1) >= 2
+        else:
+            mask = numpy.linalg.norm(flat_image, axis=1) <= self._adjusted_background_dynamic
         # cv2.imshow('AND', mask.reshape((self.shape[1], self.shape[2])).astype(numpy.uint8) * 200)
         # return numpy.linalg.norm(flat_image - self._mean_background, axis=1).astype(numpy.uint8).reshape(self.shape_bw)
-        absdiff[mask] = [255, 0, 0]
-        return absdiff.reshape(self.shape)
+        difference[mask] = self.filter_color
+        difference = difference.reshape(self.shape)
+        if self.as_intensity:
+            difference = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
+        return difference
         # return image - self._mean_background
+
+
+class Abort:
+    def __init__(self):
+        self._abort = False
+
+    @property
+    def should_abort(self):
+        return self._abort
+
+    def abort(self):
+        self._abort = True
+
+GLOBAL_ABORT = Abort()
 
 
 def reset_background():
     print("Resetting background image...", end=" ")
-    movement_filter.set_background_image([cap.read()[1] for _ in range(40)])
+    movement_filter.set_background_images([cap.read()[1] for _ in range(40)])
     print("Done.")
 
 
@@ -184,7 +231,9 @@ if __name__ == '__main__':
     camera_information(cap)
 
     movement_filter = BackgroundSubtraction([cap.read()[1] for _ in range(10)])
-    print("Done.")
+    movement_filter.filter_color = [255, 0, 0]
+    movement_filter.show_debug_window = True
+    # movement_filter.as_intensity = False
 
     print("Initializing MIDI...")
     if not MidiManager.test_midi_support():

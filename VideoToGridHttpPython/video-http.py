@@ -6,8 +6,27 @@ import time
 import httplib2
 import argparse
 import sys
+from background import BackgroundSubtraction
 
-# movement_filter = 0
+from midi_manger import MidiManager
+
+movement_filter = None
+
+
+class Abort:
+    def __init__(self):
+        self._abort = False
+
+    @property
+    def should_abort(self):
+        return self._abort
+
+    def abort(self):
+        self._abort = True
+
+GLOBAL_ABORT = Abort()
+threshold = 200
+gaussian_blur = 0
 
 
 def server_call(method, parameters):
@@ -50,7 +69,7 @@ def main():
     while(1):
         ret, frame = cap.read()
 
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         moving_objects_image = movement_filter.apply(frame)
 
         objects_in_field = moving_objects_image[:, rectangle_offset:rectangle_offset+target_size]
@@ -60,8 +79,11 @@ def main():
         center_image = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
         overlay = np.zeros((frame_size[0], frame_size[1], 3), dtype='uint8')
 
-        two_channel_objects_in_field = cv2.threshold(objects_in_field, 200, 255, cv2.THRESH_BINARY)
+        two_channel_objects_in_field = cv2.threshold(objects_in_field, threshold, 255, cv2.THRESH_BINARY)
         two_channel_objects_in_field = two_channel_objects_in_field[1]
+        if gaussian_blur > 0:
+            two_channel_objects_in_field = cv2.GaussianBlur(two_channel_objects_in_field, 5, gaussian_blur)
+
         _, raw_contours, hierarchy = cv2.findContours(two_channel_objects_in_field, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # , offset=(rectangle_offset, 0)
 
@@ -139,10 +161,9 @@ def main():
         cv2.imshow('Analysis (areas only)', rainbow_contour_image)
 
         k = cv2.waitKey(30) & 0xff
-        if k == 143:  # camera trigger
-            global movement_filter
-            movement_filter = cv2.createBackgroundSubtractorKNN()
-        if k == 27:
+        if k == 143 or k == 32:  # camera trigger or space bar
+            reset_background()
+        if k == 27 or GLOBAL_ABORT.should_abort:
             break
 
     print("\nShutting down...")
@@ -156,6 +177,23 @@ def main():
     cv2.destroyAllWindows()
     print("Done and good bye!")
     exit(0)
+
+
+def reset_background():
+    global movement_filter
+    # movement_filter = cv2.createBackgroundSubtractorKNN()
+    movement_filter.set_background_images([cap.read()[1] for _ in range(40)])
+
+
+
+def change_threshold(new_threshold):
+    global threshold
+    threshold = new_threshold
+
+
+def change_gaussian_blur(new_gaussian_blur):
+    global gaussian_blur
+    gaussian_blur = new_gaussian_blur
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -175,10 +213,55 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(VIDEO_ID)
     ret, frame = cap.read()
     cv2.imshow('Input (converted to grayscale)', frame)
-    movement_filter = cv2.createBackgroundSubtractorKNN()
+    # movement_filter = cv2.createBackgroundSubtractorKNN()
+    # movement_filter = cv2.createBackgroundSubtractorMOG2()
+    movement_filter = BackgroundSubtraction()
+    movement_filter.show_debug_window = True
     print("Done.")
 
     http = httplib2.Http()
+
+
+    print("Initializing MIDI...")
+    if not MidiManager.test_midi_support():
+        print("No MIDI :(")
+    else:
+        midi_manager = MidiManager()
+
+        midi_manager.register_handler(
+            MidiManager.SLIDER_0,
+            lambda value: cap.set(cv2.CAP_PROP_SATURATION, value / 127.0)
+        )
+        midi_manager.register_handler(
+            MidiManager.SLIDER_1,
+            lambda value: cap.set(cv2.CAP_PROP_CONTRAST, value / 127.0)
+        )
+        midi_manager.register_handler(
+            MidiManager.SLIDER_2,
+            lambda value: cap.set(cv2.CAP_PROP_GAIN, value / 127.0)
+        )
+        midi_manager.register_handler(
+            MidiManager.SLIDER_3,
+            lambda value: movement_filter.change_dynamic(value / 127.0 * 10)
+        )
+        midi_manager.register_handler(
+            MidiManager.SLIDER_4,
+            lambda value: change_threshold(value / 127.0 * 255)
+        )
+        midi_manager.register_handler(
+            MidiManager.SLIDER_5,
+            lambda value: change_gaussian_blur(value / 127.0 * 20)
+        )
+        midi_manager.register_handler(
+            MidiManager.REPEAT_BUTTON,
+            MidiManager.lambda_midi_positive(reset_background)
+        )
+        midi_manager.register_handler(
+            MidiManager.STOP_BUTTON,
+            MidiManager.lambda_midi_positive(GLOBAL_ABORT.abort)
+        )
+        print("Done.")
+
     main()
 
     while True:
